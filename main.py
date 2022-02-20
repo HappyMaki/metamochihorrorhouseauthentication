@@ -3,6 +3,7 @@ from flask import g
 from flask import Flask
 from flask import request
 from db_queries import sql
+import argparse
 
 app = Flask(__name__)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
@@ -88,4 +89,9 @@ def register():
 
 
 if __name__ == "__main__":
-    app.run()
+    parser = argparse.ArgumentParser(description='Starts authentication server for metamochihorrorhouse')
+    parser.add_argument('--host', default="127.0.0.1", type=str, help='host ip. typically 127.0.0.1 or 0.0.0.0')
+    parser.add_argument('--port', default=5000, type=str, help='port to host server on')
+    args = parser.parse_args()
+
+    app.run(host=args.host, port=args.port)

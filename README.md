@@ -1,1 +1,2 @@
 # metamochihorrorhouseauthentication
+Repository for authentication server for metamochihorrorhouse

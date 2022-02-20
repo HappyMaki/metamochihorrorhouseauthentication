@@ -1,0 +1,1 @@
+pkill metamochi-main.py

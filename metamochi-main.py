@@ -4,6 +4,7 @@ from flask import Flask
 from flask import request
 from db_queries import sql
 import argparse
+from error_messages import lookup
 
 app = Flask(__name__)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
@@ -36,11 +37,19 @@ def insert_db(query, args=(), one=False):
         cur = con.execute(query, args)
         con.commit()
         cur.close()
-        return {"account_created": "true"}
-    except sqlite3.IntegrityError as e:
         return {
-            "account_created": "false",
-            "message": str(e)
+            "success": True,
+            "message": "Success!"
+            }
+    except sqlite3.IntegrityError as e:
+        if str(e) in lookup:
+            message = lookup[str(e)]
+        else:
+            message = str(e)
+            print(str(e))
+        return {
+            "success": False,
+            "message": message
         }
 
 
@@ -61,37 +70,48 @@ def index():
 
 @app.route('/authenticate')
 def authenticate():
-    name = request.args.get('name')
+    name = request.args.get('name').lower()
     password_hash = request.args.get('password_hash')
-
+    print(password_hash)
     if not name.isalnum() or not password_hash.isalnum():
         return {
-            "error": "name or hash is not alphanumeric"
+            "success": False,
+            "message": "Name and password must be alphanumeric"
         }
 
     query = sql.get("authenticate_user").replace("${name}", name).replace("${password_hash}", password_hash)
     data = query_db(query)
     return data[0]
 
+
 @app.route('/register')
 def register():
-    name = request.args.get('name')
+    name = request.args.get('name').lower()
     password_hash = request.args.get('password_hash')
+
+    if len(name) < 4:
+        return {
+            "success": False,
+            "message": "Name must be at least four characters"
+        }
 
     if not name.isalnum() or not password_hash.isalnum():
         return {
-            "error": "name or hash is not alphanumeric"
+            "success": False,
+            "message": "Name and password must be alphanumeric"
         }
 
     query = sql.get("register_user").replace("${name}", name).replace("${password_hash}", password_hash)
     data = insert_db(query)
+    data["name"] = name
     return data
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Starts authentication server for metamochihorrorhouse')
     parser.add_argument('--host', default="127.0.0.1", type=str, help='host ip. typically 127.0.0.1 or 0.0.0.0')
-    parser.add_argument('--port', default=5080, type=str, help='port to host server on')
+    parser.add_argument('--port', default=7777, type=str, help='port to host server on')
     args = parser.parse_args()
 
     app.run(host=args.host, port=args.port, ssl_context='adhoc')
+

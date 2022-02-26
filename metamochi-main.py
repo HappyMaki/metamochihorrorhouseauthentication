@@ -70,24 +70,50 @@ def index():
 
 @app.route('/authenticate')
 def authenticate():
-    name = request.args.get('name').lower()
-    password_hash = request.args.get('password_hash')
-    print(password_hash)
-    if not name.isalnum() or not password_hash.isalnum():
+    # name = request.args.get('name').lower()
+    # password_hash = request.args.get('password_hash')
+    name = request.headers.get('name')
+    password_hash = request.headers.get('password_hash')
+
+
+    if name is None or password_hash is None or not name.isalnum() or not password_hash.isalnum():
         return {
             "success": False,
-            "message": "Name and password must be alphanumeric"
+            "message": "Something was wrong with your credentials. Please try again"
+        }
+
+    if len(name) < 4:
+        return {
+            "success": False,
+            "message": "Nickname doesn't exist"
         }
 
     query = sql.get("authenticate_user").replace("${name}", name).replace("${password_hash}", password_hash)
     data = query_db(query)
-    return data[0]
+    if data[0]["name"] is None:
+        message = "Incorrect account and password combination"
+    else:
+        message = "Login Successful"
+
+    return {
+        "success": bool(data[0]["success"]),
+        "message": message,
+        "name": name
+    }
 
 
 @app.route('/register')
 def register():
-    name = request.args.get('name').lower()
-    password_hash = request.args.get('password_hash')
+    # name = request.args.get('name').lower()
+    # password_hash = request.args.get('password_hash')
+    name = request.headers.get('name')
+    password_hash = request.headers.get('password_hash')
+
+    if name is None or password_hash is None:
+        return {
+            "success": False,
+            "message": "Name and password cannot be blank"
+        }
 
     if len(name) < 4:
         return {

@@ -3,12 +3,12 @@ sql = {
 
     "authenticate_user": """
         select 
-            name as account,
+            name as name,
             CASE 
                  WHEN count() == 0 THEN false
                  WHEN count() == 1 THEN true
                  ELSE false  
-            END AS authenticated
+            END AS success
         from users 
         where name = '${name}' 
         and password_hash = '${password_hash}'

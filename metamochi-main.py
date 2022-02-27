@@ -72,7 +72,7 @@ def index():
 def authenticate():
     # name = request.args.get('name').lower()
     # password_hash = request.args.get('password_hash')
-    name = request.headers.get('name')
+    name = request.headers.get('name').lower()
     password_hash = request.headers.get('password_hash')
 
 
@@ -106,7 +106,7 @@ def authenticate():
 def register():
     # name = request.args.get('name').lower()
     # password_hash = request.args.get('password_hash')
-    name = request.headers.get('name')
+    name = request.headers.get('name').lower()
     password_hash = request.headers.get('password_hash')
 
     if name is None or password_hash is None:

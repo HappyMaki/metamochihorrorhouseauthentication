@@ -1,4 +1,4 @@
 lookup = {
-    "UNIQUE constraint failed: users.name": "Name already in use",
+    "UNIQUE constraint failed: users.name": "Failed: Name already in use",
 
 }

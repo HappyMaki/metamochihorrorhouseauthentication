@@ -18,4 +18,17 @@ sql = {
         INSERT INTO users (name, password_hash)
         VALUES('${name}', '${password_hash}');
     """,
+
+    "get_character_data": """
+        SELECT
+            character_creation_data
+        FROM users
+        where name = '${name}' 
+    """,
+
+    "set_character_data": """
+        UPDATE users
+        SET character_creation_data = '${character_data}'
+        WHERE name = "${name}"
+    """
 }

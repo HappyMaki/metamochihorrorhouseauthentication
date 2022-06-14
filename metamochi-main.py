@@ -112,25 +112,63 @@ def register():
     if name is None or password_hash is None:
         return {
             "success": False,
-            "message": "Name and password cannot be blank"
+            "message": "Failed: Name and password cannot be blank"
         }
 
     if len(name) < 4:
         return {
             "success": False,
-            "message": "Name must be at least four characters"
+            "message": "Failed: Name must be at least four characters"
         }
 
     if not name.isalnum() or not password_hash.isalnum():
         return {
             "success": False,
-            "message": "Name and password must be alphanumeric"
+            "message": "Failed: Name and password must be alphanumeric"
         }
 
     query = sql.get("register_user").replace("${name}", name).replace("${password_hash}", password_hash)
     data = insert_db(query)
     data["name"] = name
     return data
+
+@app.route('/get_character_data')
+def getCharacterData():
+    name = request.headers.get('name').lower()
+    query = sql.get("get_character_data").replace("${name}", name)
+    data = query_db(query)
+
+    if len(data) == 0:
+        message = "Character does not exist"
+        code = -1
+    elif data[0]["character_creation_data"] is None:
+        message = "No character data found. Starting to character creation."
+        code = 0
+    else:
+        message = "Data found. Loading into game"
+        code = 1
+
+    return {
+        "message": message,
+        "name": name,
+        "data": data[0]["character_creation_data"],
+        "code": code
+
+    }
+
+@app.route('/set_character_data')
+def setCharacterData():
+    name = request.headers.get('name').lower()
+    character_data = request.headers.get('character_data')
+    query = sql.get("set_character_data").replace("${name}", name).replace("${character_data}", character_data)
+    print(query)
+    data = insert_db(query)
+
+    return {
+        "code": 0,
+        "data": str(data)
+    }
+
 
 
 if __name__ == "__main__":
